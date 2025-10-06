@@ -3,7 +3,11 @@ from pyvis.network import Network
 from streamlit.components.v1 import html
 import json
 
-st.title("🔗 PyVis Hello World")
+# ----------------------------
+# UI
+# ----------------------------
+st.set_page_config(page_title="Web of Abstraction", layout="wide")
+st.title("🕸️ Web of Abstraction (Abstract → Concrete)")
 
 # Build a tiny graph
 net = Network(
