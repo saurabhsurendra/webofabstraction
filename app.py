@@ -204,19 +204,25 @@ with colL:
 with colR:
     st.subheader("🗺️ Graph")
     # Build PyVis graph
-    net = Network(height="650px", directed=True, bgcolor="#ffffff", font_color="#000000")
+    net = Network(
+        height="650px",
+        width="100%",
+        directed=True,
+        bgcolor="#ffffff",
+        font_color="#000000",
+        notebook=False,
+        cdn_resources="in_line",   # <- important in Streamlit Cloud
+    )    
     net.barnes_hut()  # stabilize
 
     # Hierarchical layout for readability (top=abstract, bottom=concrete)
     options = {
       "physics": {"enabled": True, "stabilization": {"iterations": 120}},
       "layout": {"hierarchical": {"enabled": True, "direction": "UD", "sortMethod": "directed"}},
-      "edges": {
-        "arrows": {"to": {"enabled": True}},
-        "smooth": {"enabled": True, "type": "dynamic"}   # <-- smoothing here
-      },
+      "edges": {"arrows": {"to": {"enabled": True}}, "smooth": {"enabled": True, "type": "dynamic"}},
       "interaction": {"hover": True, "dragNodes": True, "multiselect": False}
     }
+    net.set_options(json.dumps(options))
 
     # Add nodes/edges
     for nid in st.session_state.G.nodes:
