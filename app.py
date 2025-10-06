@@ -54,6 +54,10 @@ with st.sidebar:
 
     st.markdown("---")
     st.caption("Tip: Edges point from **more abstract → more concrete**. Use ABOVE to go abstract, BELOW to go concrete.")
+
+if st.session_state.G.number_of_nodes() == 0:
+    st.info("Create a root question in the left sidebar, or import a JSON to begin.")
+    st.stop()
     
 # Build a tiny graph
 net = Network(
