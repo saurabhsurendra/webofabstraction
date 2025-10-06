@@ -74,8 +74,8 @@ net.set_options(json.dumps(options))
 
 # Add two nodes and one edge
 net.add_node(1, label="How might we make the tool work?", shape="ellipse", color="#FB7E81")
-net.add_node(2, label="How might we make the pyvis render HTML?", shape="box", color="#97C2FC")
-net.add_edge(1, 2, title="is stopped by")
+#net.add_node(2, label="How might we make the pyvis render HTML?", shape="box", color="#97C2FC")
+#net.add_edge(1, 2, title="is stopped by")
 
 # Render to HTML string and display inside Streamlit
 html_str = net.generate_html(name="hello_world.html")
