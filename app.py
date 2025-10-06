@@ -21,6 +21,9 @@ def init_state():
     if "current_id" not in st.session_state:
         st.session_state.current_id = None
 
+def list_nodes_sorted() -> List[int]:
+    return sorted(st.session_state.G.nodes)
+
 init_state()
 
 # New or load
