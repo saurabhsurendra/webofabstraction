@@ -59,6 +59,9 @@ if st.session_state.G.number_of_nodes() == 0:
     st.info("Create a root question in the left sidebar, or import a JSON to begin.")
     #st.stop()
 
+# Controls
+colL, colR = st.columns([0.42, 0.58])
+
 with colL:
     st.subheader("🧭 Navigate & Edit")
     all_nodes = list_nodes_sorted()
