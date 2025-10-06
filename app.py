@@ -222,7 +222,7 @@ with colR:
       "edges": {"arrows": {"to": {"enabled": True}}, "smooth": {"enabled": True, "type": "dynamic"}},
       "interaction": {"hover": True, "dragNodes": True, "multiselect": False}
     }
-    net.set_options(json.dumps(options))
+    #net.set_options(json.dumps(options))
 
     # Add nodes/edges
     for nid in st.session_state.G.nodes:
