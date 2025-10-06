@@ -1,5 +1,7 @@
 import streamlit as st
 from pyvis.network import Network
+import networkx as nx
+
 from streamlit.components.v1 import html
 import json
 
@@ -8,6 +10,18 @@ import json
 # ----------------------------
 st.set_page_config(page_title="Web of Abstraction", layout="wide")
 st.title("🕸️ Web of Abstraction (Abstract → Concrete)")
+
+def init_state():
+    if "G" not in st.session_state:
+        st.session_state.G = nx.DiGraph()
+    if "id_counter" not in st.session_state:
+        st.session_state.id_counter = 0
+    if "root_id" not in st.session_state:
+        st.session_state.root_id = None
+    if "current_id" not in st.session_state:
+        st.session_state.current_id = None
+
+init_state()
 
 # Build a tiny graph
 net = Network(
