@@ -61,7 +61,7 @@ with st.sidebar:
 
 if st.session_state.G.number_of_nodes() == 0:
     st.info("Create a root question in the left sidebar, or import a JSON to begin.")
-    #st.stop()
+    st.stop()
 
 # Controls
 colL, colR = st.columns([0.42, 0.58])
