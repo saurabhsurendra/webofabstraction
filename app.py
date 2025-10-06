@@ -23,6 +23,38 @@ def init_state():
 
 init_state()
 
+# New or load
+with st.sidebar:
+    st.header("🔧 Setup / Import / Export")
+
+    if st.session_state.root_id is None:
+        default_root = "How might we launch a memorable first podcast episode?"
+        root_text = st.text_input("Root 'How might we…?' question:", default_root)
+        if st.button("Create Root"):
+            if root_text.strip():
+                set_root(root_text.strip())
+
+    uploaded = st.file_uploader("Import JSON", type=["json"])
+    if uploaded is not None:
+        try:
+            data = json.load(uploaded)
+            load_from_dict(data)
+            st.success("Imported JSON successfully.")
+        except Exception as e:
+            st.error(f"Failed to load JSON: {e}")
+
+    if st.session_state.G.number_of_nodes() > 0:
+        export_json = json.dumps(to_dict(), ensure_ascii=False, indent=2)
+        st.download_button(
+            "Export JSON",
+            data=export_json.encode("utf-8"),
+            file_name="web_of_abstraction.json",
+            mime="application/json",
+        )
+
+    st.markdown("---")
+    st.caption("Tip: Edges point from **more abstract → more concrete**. Use ABOVE to go abstract, BELOW to go concrete.")
+    
 # Build a tiny graph
 net = Network(
     height="500px",
