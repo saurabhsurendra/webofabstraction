@@ -58,7 +58,48 @@ with st.sidebar:
 if st.session_state.G.number_of_nodes() == 0:
     st.info("Create a root question in the left sidebar, or import a JSON to begin.")
     #st.stop()
-    
+
+with colL:
+    st.subheader("🧭 Navigate & Edit")
+    all_nodes = list_nodes_sorted()
+    labels = [node_display(n) for n in all_nodes]
+    idx_default = 0
+    if st.session_state.current_id in all_nodes:
+        idx_default = all_nodes.index(st.session_state.current_id)
+
+    chosen = st.selectbox("Current node", options=list(zip(labels, all_nodes)), index=idx_default, format_func=lambda x: x[0])
+    current_id = chosen[1] if isinstance(chosen, tuple) else chosen
+    st.session_state.current_id = current_id
+
+    current = st.session_state.G.nodes[current_id]["data"]
+    edited_text = st.text_area("Edit text", value=current.text, height=120)
+    if st.button("Save text"):
+        st.session_state.G.nodes[current_id]["data"].text = edited_text.strip()
+        st.success("Updated.")
+
+    st.markdown("**Add nodes**")
+    new_above = st.text_input("New ABOVE (more abstract)", placeholder="How might we … ?")
+    new_below = st.text_input("New BELOW (more concrete)", placeholder="How might we … ?")
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("➕ Add ABOVE"):
+            text = new_above.strip() if new_above.strip() else "How might we … ?"
+            add_above(current_id, text, move_to_new=True)
+            st.experimental_rerun()
+    with c2:
+        if st.button("➕ Add BELOW"):
+            text = new_below.strip() if new_below.strip() else "How might we … ?"
+            add_below(current_id, text, move_to_new=True)
+            st.experimental_rerun()
+
+    st.markdown("---")
+    danger = st.checkbox("Enable destructive action")
+    if danger and st.button("🗑️ Delete current node"):
+        delete_node(current_id)
+        st.warning("Node deleted.")
+        st.experimental_rerun()
+
+
 # Build a tiny graph
 net = Network(
     height="500px",
