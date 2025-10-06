@@ -208,14 +208,15 @@ with colR:
     net.barnes_hut()  # stabilize
 
     # Hierarchical layout for readability (top=abstract, bottom=concrete)
-    net.set_options("""
-        {
-          "physics": { "enabled": true, "stabilization": { "iterations": 120 } },
-          "layout": { "hierarchical": { "enabled": true, "direction": "UD", "sortMethod": "directed" } },
-          "edges": { "arrows": { "to": { "enabled": true } } },
-          "interaction": { "hover": true, "dragNodes": true, "multiselect": false }
-        }
-        """)
+    options = {
+      "physics": {"enabled": True, "stabilization": {"iterations": 120}},
+      "layout": {"hierarchical": {"enabled": True, "direction": "UD", "sortMethod": "directed"}},
+      "edges": {
+        "arrows": {"to": {"enabled": True}},
+        "smooth": {"enabled": True, "type": "dynamic"}   # <-- smoothing here
+      },
+      "interaction": {"hover": True, "dragNodes": True, "multiselect": False}
+    }
 
     # Add nodes/edges
     for nid in st.session_state.G.nodes:
