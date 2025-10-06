@@ -1,6 +1,7 @@
 import streamlit as st
 from pyvis.network import Network
 from streamlit.components.v1 import html
+import json
 
 st.title("🔗 PyVis Hello World")
 
@@ -14,6 +15,12 @@ net = Network(
     notebook=False,
     cdn_resources="in_line",  # keeps JS/CSS bundled so Streamlit Cloud works
 )
+options = {
+    "physics": {"enabled": True, "stabilization": {"iterations": 120}},
+    "layout": {"hierarchical": {"enabled": True, "direction": "UD"}},
+    "edges": {"arrows": {"to": {"enabled": True}}, "smooth": {"enabled": True, "type": "dynamic"}},
+}
+net.set_options(json.dumps(options))
 
 # Add two nodes and one edge
 net.add_node(1, label="How might we make the tool work?", shape="ellipse", color="#FB7E81")
