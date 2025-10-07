@@ -174,6 +174,23 @@ with colR:
     }
     net.set_options(json.dumps(options))
 
+    # Add nodes/edges
+    for nid in st.session_state.G.nodes:
+        nd: NodeData = st.session_state.G.nodes[nid]["data"]
+        label = wrap_label(nd.text, width=26)
+        title = f"ID: {nid} | Level: {nd.level}"
+        shape = "box"
+        border = 3 if nid == st.session_state.current_id else 1
+        net.add_node(nid, label=label, title=title, shape=shape, borderWidth=border)
+
+    for u, v in st.session_state.G.edges:
+        net.add_edge(u, v)
+
+
+
+
+
+
 # Build a tiny graph
 test_net = Network(
     height="500px",
