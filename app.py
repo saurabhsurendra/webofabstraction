@@ -192,12 +192,9 @@ with colR:
         net.add_edge(u, v)
 
     # Render to HTML and display
-    #net.set_edge_smooth('dynamic')
-    html_path = "graph.html"
-    net.show(html_path)
-    with open(html_path, "r", encoding="utf-8") as f:
-        html_str = f.read()
-    html(html_str, height=680, scrolling=True)
+    net.set_edge_smooth('dynamic')
+    html_str = net.generate_html(name="graph.html")
+    html(html_str, height=520, scrolling=True)
 
 
 
