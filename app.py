@@ -51,6 +51,9 @@ def set_root(text: str):
     st.session_state.root_id = nid
     st.session_state.current_id = nid
 
+def wrap_label(s: str, width: int = 26) -> str:
+    return "\n".join(textwrap.wrap(s, width=width)) if s else ""
+    
 def list_nodes_sorted() -> List[int]:
     return sorted(st.session_state.G.nodes)
 
