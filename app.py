@@ -1,14 +1,20 @@
-import streamlit as st
-import textwrap
+# Streamlit Web of Abstraction
+# Features:
+# - Interactive graph (directed: abstract → concrete)
+# - Select a node, add ABOVE (more abstract) / BELOW (more concrete)
+# - Edit node text; switch current node; delete node (optional)
+# - Auto-layout (hierarchical top→down)
+# - Import/Export JSON (compatible with the Python module I shared)
 
-from pyvis.network import Network
-import networkx as nx
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
-
-from streamlit.components.v1 import html
 import json
+import textwrap
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
+import streamlit as st
+import networkx as nx
+from pyvis.network import Network
+from streamlit.components.v1 import html
 
 # ----------------------------
 # Data model
@@ -18,20 +24,6 @@ class NodeData:
     text: str
     level: int
 
-def to_dict() -> Dict:
-    nodes = []
-    for nid in st.session_state.G.nodes:
-        nd: NodeData = st.session_state.G.nodes[nid]["data"]
-        nodes.append({"id": nid, "text": nd.text, "level": nd.level})
-    edges = [{"source": u, "target": v} for u, v in st.session_state.G.edges]
-    return {
-        "nodes": nodes,
-        "edges": edges,
-        "current_id": st.session_state.current_id,
-        "root_id": st.session_state.root_id,
-        "id_counter": st.session_state.id_counter,
-    }
-    
 def init_state():
     if "G" not in st.session_state:
         st.session_state.G = nx.DiGraph()
@@ -53,9 +45,65 @@ def set_root(text: str):
     st.session_state.root_id = nid
     st.session_state.current_id = nid
 
+def add_above(cur_id: int, text: str, move_to_new=True) -> int:
+    cur_level = st.session_state.G.nodes[cur_id]["data"].level
+    new_id = add_node(text, level=cur_level + 1)
+    st.session_state.G.add_edge(new_id, cur_id)  # abstract → concrete
+    if move_to_new:
+        st.session_state.current_id = new_id
+    return new_id
+
+def add_below(cur_id: int, text: str, move_to_new=True) -> int:
+    cur_level = st.session_state.G.nodes[cur_id]["data"].level
+    new_id = add_node(text, level=cur_level - 1)
+    st.session_state.G.add_edge(cur_id, new_id)  # abstract → concrete
+    if move_to_new:
+        st.session_state.current_id = new_id
+    return new_id
+
+def delete_node(nid: int):
+    # safeguard: don't delete if it would empty the graph
+    if st.session_state.G.has_node(nid):
+        st.session_state.G.remove_node(nid)
+        if st.session_state.current_id == nid:
+            # pick a remaining node as current if any
+            nodes = list(st.session_state.G.nodes)
+            st.session_state.current_id = nodes[0] if nodes else None
+        if st.session_state.root_id == nid:
+            st.session_state.root_id = None
+
+def to_dict() -> Dict:
+    nodes = []
+    for nid in st.session_state.G.nodes:
+        nd: NodeData = st.session_state.G.nodes[nid]["data"]
+        nodes.append({"id": nid, "text": nd.text, "level": nd.level})
+    edges = [{"source": u, "target": v} for u, v in st.session_state.G.edges]
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "current_id": st.session_state.current_id,
+        "root_id": st.session_state.root_id,
+        "id_counter": st.session_state.id_counter,
+    }
+
+def load_from_dict(data: Dict):
+    st.session_state.G.clear()
+    st.session_state.id_counter = data.get("id_counter", 0)
+    st.session_state.root_id = data.get("root_id")
+    st.session_state.current_id = data.get("current_id")
+
+    for n in data.get("nodes", []):
+        nid = n["id"]
+        st.session_state.G.add_node(
+            nid,
+            data=NodeData(text=n["text"], level=int(n.get("level", 0)))
+        )
+    for e in data.get("edges", []):
+        st.session_state.G.add_edge(e["source"], e["target"])
+
 def wrap_label(s: str, width: int = 26) -> str:
     return "\n".join(textwrap.wrap(s, width=width)) if s else ""
-    
+
 def list_nodes_sorted() -> List[int]:
     return sorted(st.session_state.G.nodes)
 
@@ -66,15 +114,13 @@ def node_display(nid: int) -> str:
     preview = nd.text if len(nd.text) <= 80 else nd.text[:77] + "..."
     return f"[{nid}] L{nd.level}: {preview}"
 
-
-init_state()
-
 # ----------------------------
 # UI
 # ----------------------------
 st.set_page_config(page_title="Web of Abstraction", layout="wide")
 st.title("🕸️ Web of Abstraction (Abstract → Concrete)")
 
+init_state()
 
 # New or load
 with st.sidebar:
@@ -155,7 +201,6 @@ with colL:
         st.warning("Node deleted.")
         st.experimental_rerun()
 
-
 with colR:
     st.subheader("🗺️ Graph")
     # Build PyVis graph
@@ -177,7 +222,7 @@ with colR:
       "edges": {"arrows": {"to": {"enabled": True}}, "smooth": {"enabled": True, "type": "dynamic"}},
       "interaction": {"hover": True, "dragNodes": True, "multiselect": False}
     }
-    net.set_options(json.dumps(options))
+    #net.set_options(json.dumps(options))
 
     # Add nodes/edges
     for nid in st.session_state.G.nodes:
@@ -193,34 +238,10 @@ with colR:
 
     # Render to HTML and display
     # net.set_edge_smooth('dynamic')
-    html_str = net.generate_html(name="graph.html")
-    html(html_str, height=520, scrolling=True)
+    html_path = "graph.html"
+    net.show(html_path)
+    with open(html_path, "r", encoding="utf-8") as f:
+        html_str = f.read()
+    html(html_str, height=680, scrolling=True)
 
-
-
-
-# Build a tiny graph
-test_net = Network(
-    height="500px",
-    width="100%",
-    directed=True,
-    bgcolor="#ffffff",
-    font_color="#000000",
-    notebook=False,
-    cdn_resources="in_line",  # keeps JS/CSS bundled so Streamlit Cloud works
-)
-options = {
-    "physics": {"enabled": True, "stabilization": {"iterations": 120}},
-    "layout": {"hierarchical": {"enabled": True, "direction": "UD"}},
-    "edges": {"arrows": {"to": {"enabled": True}}, "smooth": {"enabled": True, "type": "dynamic"}},
-}
-test_net.set_options(json.dumps(options))
-
-# Add two nodes and one edge
-test_net.add_node(1, label="How might we make the tool work?", shape="ellipse", color="#FB7E81")
-#net.add_node(2, label="How might we make the pyvis render HTML?", shape="box", color="#97C2FC")
-#net.add_edge(1, 2, title="is stopped by")
-
-# Render to HTML string and display inside Streamlit
-html_str = test_net.generate_html(name="hello_world.html")
-html(html_str, height=520, scrolling=True)
+st.caption("Tip: Click-drag the graph to explore. Use the left panel to switch the current node, then add ABOVE/BELOW.")
