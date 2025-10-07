@@ -151,8 +151,31 @@ with colL:
         st.experimental_rerun()
 
 
+with colR:
+    st.subheader("🗺️ Graph")
+    # Build PyVis graph
+    net = Network(
+        height="650px",
+        width="100%",
+        directed=True,
+        bgcolor="#ffffff",
+        font_color="#000000",
+        notebook=False,
+        cdn_resources="in_line",   # <- important in Streamlit Cloud
+    )    
+    net.barnes_hut()  # stabilize
+
+    # Hierarchical layout for readability (top=abstract, bottom=concrete)
+    options = {
+      "physics": {"enabled": True, "stabilization": {"iterations": 120}},
+      "layout": {"hierarchical": {"enabled": True, "direction": "UD", "sortMethod": "directed"}},
+      "edges": {"arrows": {"to": {"enabled": True}}, "smooth": {"enabled": True, "type": "dynamic"}},
+      "interaction": {"hover": True, "dragNodes": True, "multiselect": False}
+    }
+    net.set_options(json.dumps(options))
+
 # Build a tiny graph
-net = Network(
+test_net = Network(
     height="500px",
     width="100%",
     directed=True,
@@ -166,13 +189,13 @@ options = {
     "layout": {"hierarchical": {"enabled": True, "direction": "UD"}},
     "edges": {"arrows": {"to": {"enabled": True}}, "smooth": {"enabled": True, "type": "dynamic"}},
 }
-net.set_options(json.dumps(options))
+test_net.set_options(json.dumps(options))
 
 # Add two nodes and one edge
-net.add_node(1, label="How might we make the tool work?", shape="ellipse", color="#FB7E81")
+test_net.add_node(1, label="How might we make the tool work?", shape="ellipse", color="#FB7E81")
 #net.add_node(2, label="How might we make the pyvis render HTML?", shape="box", color="#97C2FC")
 #net.add_edge(1, 2, title="is stopped by")
 
 # Render to HTML string and display inside Streamlit
-html_str = net.generate_html(name="hello_world.html")
+html_str = test_net.generate_html(name="hello_world.html")
 html(html_str, height=520, scrolling=True)
