@@ -187,19 +187,19 @@ with colL:
         if st.button("➕ Add ABOVE"):
             text = new_above.strip() if new_above.strip() else "How might we … ?"
             add_above(current_id, text, move_to_new=True)
-            st.experimental_rerun()
+            st.rerun()
     with c2:
         if st.button("➕ Add BELOW"):
             text = new_below.strip() if new_below.strip() else "How might we … ?"
             add_below(current_id, text, move_to_new=True)
-            st.experimental_rerun()
+            st.rerun()
 
     st.markdown("---")
     danger = st.checkbox("Enable destructive action")
     if danger and st.button("🗑️ Delete current node"):
         delete_node(current_id)
         st.warning("Node deleted.")
-        st.experimental_rerun()
+        st.rerun()
 
 with colR:
     st.subheader("🗺️ Graph")
