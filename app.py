@@ -238,10 +238,7 @@ with colR:
 
     # Render to HTML and display
     # net.set_edge_smooth('dynamic')
-    html_path = "graph.html"
-    net.show(html_path)
-    with open(html_path, "r", encoding="utf-8") as f:
-        html_str = f.read()
-    html(html_str, height=680, scrolling=True)
+    html_str = net.generate_html(name="graph.html")
+    html(html_str, height=520, scrolling=True)
 
 st.caption("Tip: Click-drag the graph to explore. Use the left panel to switch the current node, then add ABOVE/BELOW.")
