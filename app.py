@@ -1,4 +1,6 @@
 import streamlit as st
+import textwrap
+
 from pyvis.network import Network
 import networkx as nx
 from typing import Dict, List, Optional, Tuple
