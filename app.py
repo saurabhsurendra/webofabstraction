@@ -191,7 +191,13 @@ with colR:
     for u, v in st.session_state.G.edges:
         net.add_edge(u, v)
 
-
+    # Render to HTML and display
+    #net.set_edge_smooth('dynamic')
+    html_path = "graph.html"
+    net.show(html_path)
+    with open(html_path, "r", encoding="utf-8") as f:
+        html_str = f.read()
+    html(html_str, height=680, scrolling=True)
 
 
 
