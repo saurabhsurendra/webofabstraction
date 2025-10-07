@@ -7,11 +7,6 @@ from dataclasses import dataclass
 from streamlit.components.v1 import html
 import json
 
-# ----------------------------
-# UI
-# ----------------------------
-st.set_page_config(page_title="Web of Abstraction", layout="wide")
-st.title("🕸️ Web of Abstraction (Abstract → Concrete)")
 
 # ----------------------------
 # Data model
@@ -59,7 +54,22 @@ def set_root(text: str):
 def list_nodes_sorted() -> List[int]:
     return sorted(st.session_state.G.nodes)
 
+def node_display(nid: int) -> str:
+    if not st.session_state.G.has_node(nid):
+        return f"[{nid}] (deleted)"
+    nd: NodeData = st.session_state.G.nodes[nid]["data"]
+    preview = nd.text if len(nd.text) <= 80 else nd.text[:77] + "..."
+    return f"[{nid}] L{nd.level}: {preview}"
+
+
 init_state()
+
+# ----------------------------
+# UI
+# ----------------------------
+st.set_page_config(page_title="Web of Abstraction", layout="wide")
+st.title("🕸️ Web of Abstraction (Abstract → Concrete)")
+
 
 # New or load
 with st.sidebar:
