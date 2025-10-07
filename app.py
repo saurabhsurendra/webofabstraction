@@ -203,7 +203,8 @@ with colL:
 
 with colR:
     st.subheader("🗺️ Graph")
-    # Build PyVis graph
+
+    # ---- 1) Build PyVis with inline assets (good for Streamlit Cloud)
     net = Network(
         height="650px",
         width="100%",
@@ -211,34 +212,69 @@ with colR:
         bgcolor="#ffffff",
         font_color="#000000",
         notebook=False,
-        cdn_resources="in_line",   # <- important in Streamlit Cloud
-    )    
-    net.barnes_hut()  # stabilize
+        cdn_resources="in_line",
+    )
 
-    # Hierarchical layout for readability (top=abstract, bottom=concrete)
+    # ---- 2) Hierarchical layout + sane spacing (NO barnes_hut)
     options = {
-      "physics": {"enabled": True, "stabilization": {"iterations": 120}},
-      "layout": {"hierarchical": {"enabled": True, "direction": "UD", "sortMethod": "directed"}},
-      "edges": {"arrows": {"to": {"enabled": True}}, "smooth": {"enabled": True, "type": "dynamic"}},
-      "interaction": {"hover": True, "dragNodes": True, "multiselect": False}
+        "layout": {
+            "hierarchical": {
+                "enabled": True,
+                "direction": "UD",          # Up (abstract) → Down (concrete)
+                "sortMethod": "directed",
+                "levelSeparation": 180,     # vertical spacing between levels
+                "nodeSpacing": 220,         # horizontal spacing on a level
+                "treeSpacing": 250
+            }
+        },
+        "physics": {
+            "enabled": True,
+            "hierarchicalRepulsion": {
+                "nodeDistance": 220,
+                "avoidOverlap": 1
+            },
+            "stabilization": {"iterations": 150}
+        },
+        "nodes": {"font": {"size": 14}},
+        "edges": {
+            "arrows": {"to": {"enabled": True}},
+            "smooth": {"enabled": True, "type": "dynamic"}
+        },
+        "interaction": {"hover": True, "dragNodes": True, "multiselect": False}
     }
-    #net.set_options(json.dumps(options))
+    net.set_options(json.dumps(options))  # IMPORTANT: pass JSON string
 
-    # Add nodes/edges
+    # ---- 3) Normalize levels so abstract stays on top
+    # Your model: higher level = more abstract (above), lower = concrete (below)
+    # vis.js expects small non-negative integers; we'll invert & shift.
+    levels = [st.session_state.G.nodes[n]["data"].level for n in st.session_state.G.nodes]
+    max_level = max(levels) if levels else 0
+
+    def display_level(model_level: int) -> int:
+        # Abstract (higher model_level) → smaller display_level so it appears on top
+        return int(max_level - model_level)
+
+    # ---- 4) Add nodes with level + wrapped labels
     for nid in st.session_state.G.nodes:
         nd: NodeData = st.session_state.G.nodes[nid]["data"]
         label = wrap_label(nd.text, width=26)
         title = f"ID: {nid} | Level: {nd.level}"
-        shape = "box"
         border = 3 if nid == st.session_state.current_id else 1
-        net.add_node(nid, label=label, title=title, shape=shape, borderWidth=border)
+        net.add_node(
+            nid,
+            label=label,
+            title=title,
+            shape="box",
+            borderWidth=border,
+            level=display_level(nd.level),   # ← critical for tidy hierarchy
+        )
 
+    # ---- 5) Add edges and render
     for u, v in st.session_state.G.edges:
         net.add_edge(u, v)
 
-    # Render to HTML and display
-    # net.set_edge_smooth('dynamic')
     html_str = net.generate_html(name="graph.html")
     html(html_str, height=520, scrolling=True)
+
 
 st.caption("Tip: Click-drag the graph to explore. Use the left panel to switch the current node, then add ABOVE/BELOW.")
