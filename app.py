@@ -12,6 +12,14 @@ import json
 st.set_page_config(page_title="Web of Abstraction", layout="wide")
 st.title("🕸️ Web of Abstraction (Abstract → Concrete)")
 
+# ----------------------------
+# Data model
+# ----------------------------
+@dataclass
+class NodeData:
+    text: str
+    level: int
+
 def init_state():
     if "G" not in st.session_state:
         st.session_state.G = nx.DiGraph()
@@ -21,6 +29,17 @@ def init_state():
         st.session_state.root_id = None
     if "current_id" not in st.session_state:
         st.session_state.current_id = None
+
+def add_node(text: str, level: int) -> int:
+    nid = st.session_state.id_counter
+    st.session_state.id_counter += 1
+    st.session_state.G.add_node(nid, data=NodeData(text=text, level=level))
+    return nid
+
+def set_root(text: str):
+    nid = add_node(text, level=0)
+    st.session_state.root_id = nid
+    st.session_state.current_id = nid
 
 def list_nodes_sorted() -> List[int]:
     return sorted(st.session_state.G.nodes)
