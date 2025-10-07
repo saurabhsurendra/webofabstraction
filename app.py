@@ -21,6 +21,20 @@ class NodeData:
     text: str
     level: int
 
+def to_dict() -> Dict:
+    nodes = []
+    for nid in st.session_state.G.nodes:
+        nd: NodeData = st.session_state.G.nodes[nid]["data"]
+        nodes.append({"id": nid, "text": nd.text, "level": nd.level})
+    edges = [{"source": u, "target": v} for u, v in st.session_state.G.edges]
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "current_id": st.session_state.current_id,
+        "root_id": st.session_state.root_id,
+        "id_counter": st.session_state.id_counter,
+    }
+    
 def init_state():
     if "G" not in st.session_state:
         st.session_state.G = nx.DiGraph()
