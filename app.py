@@ -238,7 +238,7 @@ with colR:
         "nodes": {"font": {"size": 14}},
         "edges": {
             "arrows": {"to": {"enabled": True}},
-            "smooth": {"enabled": True, "type": "dynamic"}
+            "smooth": {"enabled": False, "type": "dynamic"}
         },
         "interaction": {"hover": True, "dragNodes": True, "multiselect": False}
     }
